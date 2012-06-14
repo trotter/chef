@@ -22,12 +22,12 @@ require 'chef/win32/api/security'
 require 'chef/win32/api/system'
 
 class Chef
-  module Win32
+  module ReservedNames::Win32
     module API
       module File
-        extend Chef::Win32::API
-        include Chef::Win32::API::Security
-        include Chef::Win32::API::System
+        extend Chef::ReservedNames::Win32::API
+        include Chef::ReservedNames::Win32::API::Security
+        include Chef::ReservedNames::Win32::API::System
 
         ###############################################
         # Win32 API Constants
@@ -358,21 +358,21 @@ HANDLE WINAPI CreateFile(
   __in_opt  HANDLE hTemplateFile
 );
 =end
-        attach_function :CreateFileW, [:LPCTSTR, :DWORD, :DWORD, :LPSECURITY_ATTRIBUTES, :DWORD, :DWORD, :pointer], :HANDLE
+        safe_attach_function :CreateFileW, [:LPCTSTR, :DWORD, :DWORD, :LPSECURITY_ATTRIBUTES, :DWORD, :DWORD, :pointer], :HANDLE
 
 =begin
 BOOL WINAPI FindClose(
   __inout  HANDLE hFindFile
 );
 =end
-        attach_function :FindClose, [:HANDLE], :BOOL
+        safe_attach_function :FindClose, [:HANDLE], :BOOL
 
 =begin
 DWORD WINAPI GetFileAttributes(
   __in  LPCTSTR lpFileName
 );
 =end
-        attach_function :GetFileAttributesW, [:LPCWSTR], :DWORD
+        safe_attach_function :GetFileAttributesW, [:LPCWSTR], :DWORD
 
 =begin
 DWORD WINAPI GetFinalPathNameByHandle(
@@ -382,7 +382,7 @@ DWORD WINAPI GetFinalPathNameByHandle(
   __in   DWORD dwFlags
 );
 =end
-        attach_function :GetFinalPathNameByHandleW, [:HANDLE, :LPTSTR, :DWORD, :DWORD], :DWORD
+        safe_attach_function :GetFinalPathNameByHandleW, [:HANDLE, :LPTSTR, :DWORD, :DWORD], :DWORD
 
 =begin
 BOOL WINAPI GetFileInformationByHandle(
@@ -390,7 +390,7 @@ BOOL WINAPI GetFileInformationByHandle(
   __out  LPBY_HANDLE_FILE_INFORMATION lpFileInformation
 );
 =end
-        attach_function :GetFileInformationByHandle, [:HANDLE, :LPBY_HANDLE_FILE_INFORMATION], :BOOL
+        safe_attach_function :GetFileInformationByHandle, [:HANDLE, :LPBY_HANDLE_FILE_INFORMATION], :BOOL
 
 =begin
 HANDLE WINAPI FindFirstFile(
@@ -398,7 +398,7 @@ HANDLE WINAPI FindFirstFile(
   __out  LPWIN32_FIND_DATA lpFindFileData
 );
 =end
-        attach_function :FindFirstFileW, [:LPCTSTR, :LPWIN32_FIND_DATA], :HANDLE
+        safe_attach_function :FindFirstFileW, [:LPCTSTR, :LPWIN32_FIND_DATA], :HANDLE
 
 =begin
 BOOL WINAPI CreateHardLink(
@@ -407,7 +407,7 @@ BOOL WINAPI CreateHardLink(
   __reserved  LPSECURITY_ATTRIBUTES lpSecurityAttributes
 );
 =end
-        attach_function :CreateHardLinkW, [:LPCTSTR, :LPCTSTR, :LPSECURITY_ATTRIBUTES], :BOOLEAN
+        safe_attach_function :CreateHardLinkW, [:LPCTSTR, :LPCTSTR, :LPSECURITY_ATTRIBUTES], :BOOLEAN
 
 =begin
 BOOLEAN WINAPI CreateSymbolicLink(
@@ -416,7 +416,7 @@ BOOLEAN WINAPI CreateSymbolicLink(
   __in  DWORD dwFlags
 );
 =end
-        attach_function :CreateSymbolicLinkW, [:LPTSTR, :LPTSTR, :DWORD], :BOOLEAN
+        safe_attach_function :CreateSymbolicLinkW, [:LPTSTR, :LPTSTR, :DWORD], :BOOLEAN
 
 =begin
 DWORD WINAPI GetLongPathName(
@@ -425,7 +425,7 @@ DWORD WINAPI GetLongPathName(
   __in   DWORD cchBuffer
 );
 =end
-        attach_function :GetLongPathNameW, [:LPCTSTR, :LPTSTR, :DWORD], :DWORD
+        safe_attach_function :GetLongPathNameW, [:LPCTSTR, :LPTSTR, :DWORD], :DWORD
 
 =begin
 DWORD WINAPI GetShortPathName(
@@ -434,7 +434,7 @@ DWORD WINAPI GetShortPathName(
   __in   DWORD cchBuffer
 );
 =end
-        attach_function :GetShortPathNameW, [:LPCTSTR, :LPTSTR, :DWORD], :DWORD
+        safe_attach_function :GetShortPathNameW, [:LPCTSTR, :LPTSTR, :DWORD], :DWORD
 
 =begin
 BOOL WINAPI DeviceIoControl(
@@ -448,7 +448,7 @@ BOOL WINAPI DeviceIoControl(
   __inout_opt  LPOVERLAPPED lpOverlapped
 );
 =end
-        attach_function :DeviceIoControl, [:HANDLE, :DWORD, :LPVOID, :DWORD, :LPVOID, :DWORD, :LPDWORD, :pointer], :BOOL
+        safe_attach_function :DeviceIoControl, [:HANDLE, :DWORD, :LPVOID, :DWORD, :LPVOID, :DWORD, :LPDWORD, :pointer], :BOOL
 
         ###############################################
         # Helpers
@@ -476,7 +476,7 @@ BOOL WINAPI DeviceIoControl(
             find_data = WIN32_FIND_DATA.new
             handle = FindFirstFileW(path, find_data)
             if handle == INVALID_HANDLE_VALUE
-              Chef::Win32::Error.raise!
+              Chef::ReservedNames::Win32::Error.raise!
             end
             block.call(handle, find_data)
           ensure
@@ -494,7 +494,7 @@ BOOL WINAPI DeviceIoControl(
                                   nil, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, nil)
 
             if handle == INVALID_HANDLE_VALUE
-              Chef::Win32::Error.raise!
+              Chef::ReservedNames::Win32::Error.raise!
             end
             block.call(handle)
           ensure
@@ -509,7 +509,7 @@ BOOL WINAPI DeviceIoControl(
                                   nil, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, nil)
 
             if handle == INVALID_HANDLE_VALUE
-              Chef::Win32::Error.raise!
+              Chef::ReservedNames::Win32::Error.raise!
             end
             block.call(handle)
           ensure
@@ -523,7 +523,7 @@ BOOL WINAPI DeviceIoControl(
             file_information = BY_HANDLE_FILE_INFORMATION.new
             success = GetFileInformationByHandle(handle, file_information)
             if success == 0
-              Chef::Win32::Error.raise!
+              Chef::ReservedNames::Win32::Error.raise!
             end
           end
           file_information

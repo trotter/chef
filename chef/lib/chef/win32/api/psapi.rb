@@ -19,10 +19,10 @@
 require 'chef/win32/api'
 
 class Chef
-  module Win32
+  module ReservedNames::Win32
     module API
       module PSAPI
-        extend Chef::Win32::API
+        extend Chef::ReservedNames::Win32::API
 
         ###############################################
         # Win32 API Bindings
@@ -43,7 +43,7 @@ class Chef
 
         ffi_lib 'psapi'
 
-        attach_function :GetProcessMemoryInfo, [ :HANDLE, :pointer, :DWORD ], :BOOL
+        safe_attach_function :GetProcessMemoryInfo, [ :HANDLE, :pointer, :DWORD ], :BOOL
 
       end
     end

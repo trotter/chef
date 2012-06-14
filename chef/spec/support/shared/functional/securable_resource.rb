@@ -26,9 +26,9 @@ require 'etc'
 shared_examples_for "a securable resource" do
   context "on Unix", :unix_only do
     let(:expected_user_name) { 'nobody' }
-    let(:expected_group_name) { 'nogroup' }
     let(:expected_uid) { Etc.getpwnam(expected_user_name).uid }
-    let(:expected_gid) { Etc.getgrnam(expected_group_name).gid }
+    let(:desired_gid) { 1337 }
+    let(:expected_gid) { 1337 }
 
     pending "should set an owner (Rerun specs under root)", :requires_unprivileged_user => true
     pending "should set a group (Rerun specs under root)",  :requires_unprivileged_user => true
@@ -40,25 +40,25 @@ shared_examples_for "a securable resource" do
     end
 
     it "should set a group", :requires_root do
-      resource.group expected_group_name
+      resource.group desired_gid
       resource.run_action(:create)
       File.lstat(path).gid.should == expected_gid
     end
 
     it "should set permissions in string form as an octal number" do
+      mode_string = '776'
+      resource.mode mode_string
+      resource.run_action(:create)
       pending('Linux does not support lchmod', :if => resource.instance_of?(Chef::Resource::Link) && !os_x?) do
-        mode_string = '776'
-        resource.mode mode_string
-        resource.run_action(:create)
         (File.lstat(path).mode & 007777).should == (mode_string.oct & 007777)
       end
     end
 
     it "should set permissions in numeric form as a ruby-interpreted octal" do
+      mode_integer = 0776
+      resource.mode mode_integer
+      resource.run_action(:create)
       pending('Linux does not support lchmod', :if => resource.instance_of?(Chef::Resource::Link) && !os_x?) do
-        mode_integer = 0776
-        resource.mode mode_integer
-        resource.run_action(:create)
         (File.lstat(path).mode & 007777).should == (mode_integer & 007777)
       end
     end
@@ -67,12 +67,12 @@ shared_examples_for "a securable resource" do
   context "on Windows", :windows_only do
 
     if windows?
-      SID = Chef::Win32::Security::SID
-      ACE = Chef::Win32::Security::ACE
+      SID = Chef::ReservedNames::Win32::Security::SID
+      ACE = Chef::ReservedNames::Win32::Security::ACE
     end
 
     def get_security_descriptor(path)
-      Chef::Win32::Security.get_named_security_info(path)
+      Chef::ReservedNames::Win32::Security.get_named_security_info(path)
     end
 
     def explicit_aces
@@ -90,36 +90,36 @@ shared_examples_for "a securable resource" do
     # Standard expected rights
     let(:expected_read_perms) do
       {
-        :generic => Chef::Win32::API::Security::GENERIC_READ,
-        :specific => Chef::Win32::API::Security::FILE_GENERIC_READ,
+        :generic => Chef::ReservedNames::Win32::API::Security::GENERIC_READ,
+        :specific => Chef::ReservedNames::Win32::API::Security::FILE_GENERIC_READ,
       }
     end
 
     let(:expected_read_execute_perms) do
       {
-        :generic => Chef::Win32::API::Security::GENERIC_READ | Chef::Win32::API::Security::GENERIC_EXECUTE,
-        :specific => Chef::Win32::API::Security::FILE_GENERIC_READ | Chef::Win32::API::Security::FILE_GENERIC_EXECUTE
+        :generic => Chef::ReservedNames::Win32::API::Security::GENERIC_READ | Chef::ReservedNames::Win32::API::Security::GENERIC_EXECUTE,
+        :specific => Chef::ReservedNames::Win32::API::Security::FILE_GENERIC_READ | Chef::ReservedNames::Win32::API::Security::FILE_GENERIC_EXECUTE
       }
     end
 
     let(:expected_write_perms) do
       {
-        :generic => Chef::Win32::API::Security::GENERIC_WRITE,
-        :specific => Chef::Win32::API::Security::FILE_GENERIC_WRITE
+        :generic => Chef::ReservedNames::Win32::API::Security::GENERIC_WRITE,
+        :specific => Chef::ReservedNames::Win32::API::Security::FILE_GENERIC_WRITE
       }
     end
 
     let(:expected_modify_perms) do
       {
-        :generic => Chef::Win32::API::Security::GENERIC_READ | Chef::Win32::API::Security::GENERIC_WRITE | Chef::Win32::API::Security::GENERIC_EXECUTE | Chef::Win32::API::Security::DELETE,
-        :specific => Chef::Win32::API::Security::FILE_GENERIC_READ | Chef::Win32::API::Security::FILE_GENERIC_WRITE | Chef::Win32::API::Security::FILE_GENERIC_EXECUTE | Chef::Win32::API::Security::DELETE
+        :generic => Chef::ReservedNames::Win32::API::Security::GENERIC_READ | Chef::ReservedNames::Win32::API::Security::GENERIC_WRITE | Chef::ReservedNames::Win32::API::Security::GENERIC_EXECUTE | Chef::ReservedNames::Win32::API::Security::DELETE,
+        :specific => Chef::ReservedNames::Win32::API::Security::FILE_GENERIC_READ | Chef::ReservedNames::Win32::API::Security::FILE_GENERIC_WRITE | Chef::ReservedNames::Win32::API::Security::FILE_GENERIC_EXECUTE | Chef::ReservedNames::Win32::API::Security::DELETE
       }
     end
 
     let(:expected_full_control_perms) do
       {
-        :generic => Chef::Win32::API::Security::GENERIC_ALL,
-        :specific => Chef::Win32::API::Security::FILE_ALL_ACCESS
+        :generic => Chef::ReservedNames::Win32::API::Security::GENERIC_ALL,
+        :specific => Chef::ReservedNames::Win32::API::Security::FILE_ALL_ACCESS
       }
     end
 
@@ -283,7 +283,7 @@ shared_examples_for "a securable resource" do
 
     context "with a mode attribute" do
       if windows?
-        Security = Chef::Win32::API::Security
+        Security = Chef::ReservedNames::Win32::API::Security
       end
 
       it "respects mode in string form as an octal number" do

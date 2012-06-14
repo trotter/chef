@@ -19,10 +19,10 @@
 require 'chef/win32/api'
 
 class Chef
-  module Win32
+  module ReservedNames::Win32
     module API
       module Unicode
-        extend Chef::Win32::API
+        extend Chef::ReservedNames::Win32::API
 
         ###############################################
         # Win32 API Constants
@@ -101,7 +101,7 @@ BOOL IsTextUnicode(
   __inout  LPINT lpiResult
 );
 =end
-        attach_function :IsTextUnicode, [:pointer, :int, :LPINT], :BOOL
+        safe_attach_function :IsTextUnicode, [:pointer, :int, :LPINT], :BOOL
 
 =begin
 int MultiByteToWideChar(
@@ -113,7 +113,7 @@ int MultiByteToWideChar(
   __in   int cchWideChar
 );
 =end
-        attach_function :MultiByteToWideChar, [:UINT, :DWORD, :LPCSTR, :int, :LPWSTR, :int], :int
+        safe_attach_function :MultiByteToWideChar, [:UINT, :DWORD, :LPCSTR, :int, :LPWSTR, :int], :int
 
 =begin
 int WideCharToMultiByte(
@@ -127,7 +127,7 @@ int WideCharToMultiByte(
   __out  LPBOOL lpUsedDefaultChar
 );
 =end
-        attach_function :WideCharToMultiByte, [:UINT, :DWORD, :LPCWSTR, :int, :LPSTR, :int, :LPCSTR, :LPBOOL], :int
+        safe_attach_function :WideCharToMultiByte, [:UINT, :DWORD, :LPCWSTR, :int, :LPSTR, :int, :LPCSTR, :LPBOOL], :int
 
         ###############################################
         # Helpers
